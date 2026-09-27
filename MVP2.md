@@ -1,6 +1,4 @@
-# MVP: Pipeline de Dados na Nuvem — Débito de Sono e Uso de Celular à Noite
-
-## Contexto de Negócios e Perguntas (Etapa 2 e 4.1)
+# MVP - Débito de Sono e Uso de Celular à Noite
 
 ### Problema
 
@@ -15,7 +13,7 @@ pessoa aparece uma única vez, com valores que representam seu padrão típico).
 perguntas abaixo comparam grupos de usuários entre si, e não a evolução de uma mesma pessoa ao
 longo do tempo. Todas as associações discutidas são correlacionais, não causais.
 
-### Perguntas de negócio
+### Perguntas 
 
 1. Mais tempo de celular antes de dormir está associado a maior débito de sono?
 2. O uso de filtro de luz azul reduz a fadiga relatada no dia seguinte?
@@ -39,8 +37,8 @@ remoção) de outliers em minutos de celular à noite, relevante para a pergunta
 
 Kaggle — ["Sleep Debt & Screen Time: Late Night Phone Habits"](https://www.kaggle.com/datasets/samartalwar/sleep-debt-and-screen-time-late-night-phone-habits),
 por samartalwar. 8.500 registros relacionando uso de app antes de dormir, luz azul e fadiga no
-dia seguinte. **[Preencher: licença exata copiada da aba "License" da página do Kaggle]**. Uso
-deste trabalho é estritamente acadêmico.
+dia seguinte. 
+Uso deste trabalho é estritamente acadêmico.
 
 ### Estrutura dos dados brutos (colunas do CSV)
 
@@ -65,9 +63,9 @@ deste trabalho é estritamente acadêmico.
 | `next_day_fatigue_score` | Fadiga relatada no dia seguinte (escala numérica) |
 | `sleep_debt_category` | Categoria final de débito de sono |
 
-## Carga dos Dados (Etapa 4.2)
+## Carga dos Dados
 
-Coleta pelo **caso simples** do enunciado: o CSV foi baixado manualmente do Kaggle e enviado por
+Coleta pelo caso simples do enunciado: o CSV foi baixado manualmente do Kaggle e enviado por
 upload para um Volume do Unity Catalog no Databricks (script: `01_bronze_ingestion.py`). Não há
 API pública para este dataset, então não há automação de coleta — apenas leitura do arquivo já
 disponível no ambiente de nuvem.
@@ -75,12 +73,14 @@ disponível no ambiente de nuvem.
 O arquivo `bedtime_screentime_sleep_debt.csv` (969,47 KB) foi confirmado no volume
 `/Volumes/sleep_mvp/bronze/raw_files`:
 
-![Arquivo bruto no Volume](screenshots/arquivoraw.png)
+<img width="1068" height="433" alt="arquivoraw" src="https://github.com/user-attachments/assets/aff0b0fc-4c58-4ee0-aecb-9722a9f81334" />
+
 
 Após a leitura pelo notebook Bronze, a tabela `bronze.raw_sleep_screentime` reflete exatamente o
 CSV original (sem transformação de conteúdo), com todas as colunas mantidas como texto:
 
-![Amostra da tabela Bronze](screenshots/infobronze.png)
+<img width="1358" height="444" alt="infobronze" src="https://github.com/user-attachments/assets/b87274f1-1e8b-4f53-bd08-65607a3d8700" />
+
 
 Código de referência: [`01_bronze_ingestion.py`](./01_bronze_ingestion.py).
 
@@ -93,11 +93,13 @@ de dormir, com chave substituta `app_key`). Código de referência:
 
 As três camadas (bronze, silver, gold) foram persistidas no catálogo Unity Catalog `sleep_mvp`:
 
-![Schemas no Catalog Explorer](screenshots/camadasleepmvp.png)
+<img width="318" height="180" alt="camadasleepmvp" src="https://github.com/user-attachments/assets/b55085f6-6217-4065-bef3-918d03d22d6d" />
+
 
 Catálogo de Dados (gerado via `DESCRIBE TABLE` em cada tabela Gold):
 
-![Catálogo de dados das tabelas Gold](screenshots/catalogodedados.png)
+<img width="633" height="759" alt="catalogodedados" src="https://github.com/user-attachments/assets/142a3bab-d578-40d5-bebd-12b8289daa00" />
+
 
 | Tabela | Campo | Tipo | Descrição | Domínio / Linhagem |
 |---|---|---|---|---|
@@ -127,7 +129,8 @@ Catálogo de Dados (gerado via `DESCRIBE TABLE` em cada tabela Gold):
 
 `dim_app` possui apenas 6 linhas (uma por app catalogado):
 
-![Amostra da dim_app](screenshots/modelagemdisplay.png)
+<img width="573" height="236" alt="modelagemdisplay" src="https://github.com/user-attachments/assets/30c3d9a4-b16c-494a-9578-a02f17b936ff" />
+
 
 ## Pipeline de Dados (Etapa 4.4)
 
@@ -148,7 +151,8 @@ percentuais, e duas colunas derivadas (`age_group`, `app_category`). O print da 
 
 ## Qualidade de Dados (Etapa 4.5)
 
-![Relatório de qualidade de dados](screenshots/qualidade_dos_dados.png)
+<img width="612" height="403" alt="qualidade_dos_dados" src="https://github.com/user-attachments/assets/4e1f3b1e-321d-4d61-8673-5a1e5997e2e2" />
+
 
 **Discussão:**
 - **Completude:** 0,0% de nulos em todas as colunas verificadas (idade, gênero, ocupação,
@@ -171,7 +175,8 @@ percentuais, e duas colunas derivadas (`age_group`, `app_category`). O print da 
 
 ### Pergunta 1 — Tempo de celular à noite x categoria de débito de sono
 
-![Pergunta 1](screenshots/perg1.png)
+<img width="1356" height="532" alt="perg1" src="https://github.com/user-attachments/assets/042b25f4-4a62-413c-a0fe-4b9623ee3845" />
+
 
 Há um padrão de dose-resposta muito claro: a média de minutos de celular antes de dormir sobe de
 forma monotônica com a gravidade do débito de sono — de 33,5 min (Optimal Recovery) para 45,5 min
@@ -181,7 +186,8 @@ média, quase 4x mais tempo no celular antes de dormir do que os do grupo de rec
 
 ### Pergunta 2 — Filtro de luz azul x fadiga no dia seguinte
 
-![Pergunta 2](screenshots/perg2.png)
+<img width="1362" height="428" alt="perg2" src="https://github.com/user-attachments/assets/82f173c5-8165-4dd4-834d-8669fb991b21" />
+
 
 Quem usa filtro de luz azul relata fadiga ligeiramente menor no dia seguinte (3,58) do que quem
 não usa (3,99). A direção do efeito é a esperada (menos luz azul, menos supressão de melatonina,
@@ -191,7 +197,8 @@ possivelmente porque não reduz o *tempo* de tela, só sua composição espectra
 
 ### Pergunta 3 — Cronotipo x horas de sono e débito de sono
 
-![Pergunta 3](screenshots/perg3.png)
+<img width="1372" height="477" alt="perg3" src="https://github.com/user-attachments/assets/c9f55d23-2771-46f3-9dae-75b81f3ee0c4" />
+
 
 O cronotipo é um fator forte: corujas ("Night Owl") dormem em média só 5,01h e relatam fadiga de
 5,4 — o pior resultado entre os três grupos. Cotovias ("Morning Lark") dormem 7,38h e têm fadiga
@@ -201,7 +208,8 @@ compromissos sociais/profissionais do dia seguinte, pagando um preço maior em f
 
 ### Pergunta 4 — Cafeína após as 17h x latência do sono
 
-![Pergunta 4](screenshots/perg4.png)
+<img width="1365" height="421" alt="perg4" src="https://github.com/user-attachments/assets/e14ce867-e6c2-4aff-a11b-dd539629adf9" />
+
 
 A correlação encontrada foi de **r ≈ 0,199** — positiva (na direção esperada: mais cafeína à
 noite, mais tempo para pegar no sono), mas fraca. Isso indica que a cafeína pós-17h não é o
@@ -210,7 +218,8 @@ principal fator explicando quanto tempo alguém demora para dormir neste dataset
 
 ### Pergunta 5 — App usado antes de dormir x débito severo de sono
 
-![Pergunta 5](screenshots/perg5.png)
+<img width="1060" height="517" alt="perg5" src="https://github.com/user-attachments/assets/862eedbb-00b3-4578-a02a-e4c34e0eccde" />
+
 
 TikTok/Reels lidera com 10,8% dos seus usuários em débito severo de sono — bem acima de
 Instagram/Reddit (7,7%) e YouTube (6,8%). Na outra ponta, News/Reading tem a menor taxa (4,0%).
@@ -220,7 +229,8 @@ de conteúdo mais finito como notícias.
 
 ### Pergunta 6 — Atividade física x fadiga, controlando por tempo de celular à noite
 
-![Pergunta 6](screenshots/perg6.png)
+<img width="969" height="527" alt="perg6" src="https://github.com/user-attachments/assets/ef963c50-88cc-430e-af68-f73b0178efdc" />
+
 
 O fator decisivo aqui é o tempo de celular, não a atividade física: entre quem usa celular menos
 de 60min antes de dormir, a fadiga já é baixa independente do nível de atividade (2,43 ativos vs.
@@ -230,7 +240,8 @@ física ajuda um pouco, mas **não compensa** o efeito do uso prolongado de celu
 
 ### Pergunta 7 — Ocupação x prevalência de débito severo de sono
 
-![Pergunta 7](screenshots/perg7.png)
+<img width="809" height="487" alt="perg7" src="https://github.com/user-attachments/assets/06616b94-d475-494f-94d0-256d36e88a07" />
+
 
 Profissionais de saúde em plantão (Healthcare / Shift Worker) têm de longe a maior taxa de débito
 severo: 18,3% — mais de 2,5x a taxa do segundo colocado, Freelance/Creative (6,9%). Isso é
