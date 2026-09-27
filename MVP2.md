@@ -132,7 +132,7 @@ Catálogo de Dados (gerado via `DESCRIBE TABLE` em cada tabela Gold):
 <img width="573" height="236" alt="modelagemdisplay" src="https://github.com/user-attachments/assets/30c3d9a4-b16c-494a-9578-a02f17b936ff" />
 
 
-## Pipeline de Dados (Etapa 4.4)
+## Pipeline de Dados 
 
 Pipeline organizado em notebooks separados, seguindo a Arquitetura Medalhão:
 
@@ -149,7 +149,7 @@ domínio viram nulo em vez de descartar a linha inteira), validação de interva
 percentuais, e duas colunas derivadas (`age_group`, `app_category`). O print da seção anterior
 (schemas no Catalog Explorer) já evidencia que as três camadas foram persistidas com sucesso.
 
-## Qualidade de Dados (Etapa 4.5)
+## Qualidade de Dados 
 
 <img width="612" height="403" alt="qualidade_dos_dados" src="https://github.com/user-attachments/assets/4e1f3b1e-321d-4d61-8673-5a1e5997e2e2" />
 
@@ -171,7 +171,7 @@ percentuais, e duas colunas derivadas (`age_group`, `app_category`). O print da 
   dataset), não erros de digitação — e são justamente parte do que explica os casos de "Severe
   Sleep Debt" na Pergunta 1.
 
-## Análise de Dados (Etapa 4.5)
+## Análise de Dados
 
 ### Pergunta 1 — Tempo de celular à noite x categoria de débito de sono
 
