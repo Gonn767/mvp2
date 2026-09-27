@@ -1,32 +1,9 @@
-# Databricks notebook source
-# MAGIC %md
-# MAGIC # 02 - Silver: Limpeza e padronização (Etapa 4.4 — ETL, parte 1)
-# MAGIC
-# MAGIC Lê a tabela Bronze e aplica:
-# MAGIC - Tipagem correta (inteiros, decimais, booleano)
-# MAGIC - Remoção de duplicatas por `user_id`
-# MAGIC - Padronização de texto (trim)
-# MAGIC - Validação de domínio (categorias esperadas para gênero, ocupação, cronotipo, app e
-# MAGIC   categoria de débito de sono)
-# MAGIC - Tratamento de valores fora do intervalo plausível (idade, percentuais, horas de sono)
-# MAGIC - Colunas derivadas: faixa etária (`age_group`) e categoria do app de tela (`app_category`)
-
-# COMMAND ----------
-
-# MAGIC %run ./00_config
-
-# COMMAND ----------
-
 from pyspark.sql import functions as F
 from pyspark.sql.types import DoubleType, IntegerType
 
 bronze = spark.table(full_table_name(BRONZE_SCHEMA, "raw_sleep_screentime"))
 
-# COMMAND ----------
-
-# MAGIC %md ### Tipagem e limpeza básica
-
-# COMMAND ----------
+# COMMAND 
 
 typed = bronze.select(
     F.trim(F.col("user_id")).alias("user_id"),
@@ -49,26 +26,14 @@ typed = bronze.select(
     F.trim(F.col("sleep_debt_category")).alias("sleep_debt_category"),
 )
 
-# COMMAND ----------
-
-# MAGIC %md ### Unicidade — remove duplicatas por `user_id`
-
-# COMMAND ----------
+# COMMAND 
 
 total_before = typed.count()
 deduped = typed.dropDuplicates(["user_id"]).filter(F.col("user_id").isNotNull())
 total_after = deduped.count()
 print(f"Linhas antes da deduplicação: {total_before} | depois: {total_after} | removidas: {total_before - total_after}")
 
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ### Consistência e acurácia — trata valores fora do domínio/intervalo esperado como nulos
-# MAGIC Em vez de descartar a linha inteira (perderíamos as demais colunas válidas), cada regra
-# MAGIC zera apenas o campo violado, preservando o restante do registro para análise.
-
-# COMMAND ----------
-
+# COMMAND
 VALID_GENDERS = ["Female", "Male", "Non-Binary"]
 VALID_OCCUPATIONS = [
     "Healthcare / Shift Worker", "Student", "Remote Tech", "Corporate 9-to-5", "Freelance / Creative",
@@ -100,9 +65,9 @@ clean = (
             None
         ),
     )
-    # acurácia: idade fora de uma faixa humana plausível vira nulo
+   
     .withColumn("age", F.when((F.col("age") >= 10) & (F.col("age") <= 100), F.col("age")).otherwise(None))
-    # acurácia: percentuais devem estar entre 0 e 100
+   
     .withColumn(
         "screen_brightness_pct",
         F.when((F.col("screen_brightness_pct") >= 0) & (F.col("screen_brightness_pct") <= 100),
@@ -120,13 +85,13 @@ clean = (
             None
         ),
     )
-    # acurácia: horas de sono devem estar entre 0 e 24
+    
     .withColumn(
         "total_sleep_hours",
         F.when((F.col("total_sleep_hours") >= 0) & (F.col("total_sleep_hours") <= 24),
                F.col("total_sleep_hours")).otherwise(None),
     )
-    # acurácia: campos que não podem ser negativos
+   
     .withColumn("bedtime_phone_minutes", F.when(F.col("bedtime_phone_minutes") >= 0, F.col("bedtime_phone_minutes")).otherwise(None))
     .withColumn("caffeine_post_5pm_mg", F.when(F.col("caffeine_post_5pm_mg") >= 0, F.col("caffeine_post_5pm_mg")).otherwise(None))
     .withColumn("physical_activity_min", F.when(F.col("physical_activity_min") >= 0, F.col("physical_activity_min")).otherwise(None))
@@ -134,11 +99,6 @@ clean = (
     .withColumn("morning_alarm_snoozes", F.when(F.col("morning_alarm_snoozes") >= 0, F.col("morning_alarm_snoozes")).otherwise(None))
 )
 
-# COMMAND ----------
-
-# MAGIC %md ### Colunas derivadas: faixa etária e categoria do app de tela
-
-# COMMAND ----------
 
 APP_CATEGORY_MAP = {
     "Instagram / Reddit": "Rede Social",
