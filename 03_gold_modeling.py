@@ -1,30 +1,8 @@
-# Databricks notebook source
-# MAGIC %md
-# MAGIC # 03 - Gold: Modelagem dimensional / Esquema Estrela (Etapas 4.3 e 4.4)
-# MAGIC
-# MAGIC **Fato central:** comportamento noturno e métricas de sono por usuário
-# MAGIC (`fact_sleep_behavior`) — granularidade: 1 linha por usuário (o dataset é uma
-# MAGIC foto única por pessoa, sem série temporal).
-# MAGIC
-# MAGIC **Dimensões:** perfil demográfico do usuário (`dim_user`), app usado antes de dormir
-# MAGIC (`dim_app`).
-
-# COMMAND ----------
-
-# MAGIC %run ./00_config
-
-# COMMAND ----------
-
 from pyspark.sql import functions as F
 from pyspark.sql.window import Window
 
 silver = spark.table(full_table_name(SILVER_SCHEMA, "sleep_screentime"))
 
-# COMMAND ----------
-
-# MAGIC %md ### `dim_user`
-
-# COMMAND ----------
 
 dim_user = silver.select(
     "user_id",
@@ -42,11 +20,6 @@ dim_user = silver.select(
 )
 print(f"gold.dim_user: {dim_user.count()} linha(s)")
 
-# COMMAND ----------
-
-# MAGIC %md ### `dim_app` — dimensão pequena, com chave substituta (surrogate key)
-
-# COMMAND ----------
 
 dim_app = (
     silver.select("primary_bedtime_app", "app_category")
@@ -64,14 +37,7 @@ dim_app = (
 print(f"gold.dim_app: {dim_app.count()} linha(s)")
 display(dim_app)
 
-# COMMAND ----------
 
-# MAGIC %md
-# MAGIC ### `fact_sleep_behavior`
-# MAGIC Granularidade: 1 linha por usuário. Referencia `dim_user` por `user_id` e `dim_app`
-# MAGIC por `app_key`.
-
-# COMMAND ----------
 
 fact_sleep_behavior = (
     silver.alias("s")
@@ -101,13 +67,7 @@ fact_sleep_behavior = (
 )
 print(f"gold.fact_sleep_behavior: {fact_sleep_behavior.count()} linha(s)")
 
-# COMMAND ----------
 
-# MAGIC %md
-# MAGIC ### Catálogo de Dados (auxiliar)
-# MAGIC Rode a célula abaixo e tire um screenshot para compor o Catálogo de Dados da Etapa 4.3.
-
-# COMMAND ----------
 
 for schema, table in [
     (GOLD_SCHEMA, "dim_user"),
